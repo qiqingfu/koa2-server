@@ -5,6 +5,8 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const session = require('koa-generic-session')
+const redisStore = require('koa-redis')
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -39,6 +41,26 @@ app.use(async (ctx, next) => {
   const ms = new Date() - start
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
+
+// 设置签名的 cookie密匙
+app.keys = ['qf-koa-server']
+
+// 解析 session
+app.use(session({
+  // 会话的 cookie
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    overwrite: true,
+    signed: true
+  },
+
+  // 会话存储实例
+  store: redisStore({
+    all: '127.0.0.1:6379'
+  })
+}))
 
 // routes
 // Returns separate middleware for responding to OPTIONS requests with an Allow header containing the allowed methods, as well as responding with 405 Method Not Allowed and 501 Not Implemented as appropriate.

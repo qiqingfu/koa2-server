@@ -15,4 +15,15 @@ router.get('/list', async (ctx, next) => {
     }
 })
 
+router.get('/session-test', (ctx, next) => {
+    if (ctx.session.viewCount == null) {
+        ctx.session.viewCount = 0
+    }
+    ctx.session.viewCount++
+    ctx.body = {
+        errno: 0,
+        count: ctx.session.viewCount
+    }
+})
+
 module.exports = router
