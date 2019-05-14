@@ -7,6 +7,8 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const session = require('koa-generic-session')
 const redisStore = require('koa-redis')
+const morgan = require('koa-morgan')
+const {writeProdAssertStream} = require('./util')
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -41,6 +43,11 @@ app.use(async (ctx, next) => {
   const ms = new Date() - start
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
+
+// 记录生产环境日志
+if (process.env.NODE_ENV === 'prod') {
+	app.use(morgan('combined', { stream: writeProdAssertStream() }))
+}
 
 // 设置签名的 cookie密匙
 app.keys = ['qf-koa-server']
